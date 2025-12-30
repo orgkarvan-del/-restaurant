@@ -2335,12 +2335,26 @@
         
         // ==================== باشلىنىش ====================
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('سېستىما يۈكلىنىۋاتىدۇ...');
+            
             // ھەرىكەت كۆزىتىش
             document.addEventListener('click', resetActivityTimer);
             document.addEventListener('keypress', resetActivityTimer);
             document.addEventListener('touchstart', resetActivityTimer);
             document.addEventListener('scroll', resetActivityTimer);
             
+            // URL پارامېتىرىنى تەكشۈرۈش - خېرىدار ھالىتى (ئالدى تەكشۈرۈش)
+            const urlParams = new URLSearchParams(window.location.search);
+            const isCustomerMode = urlParams.has('customer') || urlParams.has('order') || urlParams.has('menu');
+            
+            if (isCustomerMode) {
+                console.log('خېرىدار ھالىتى بايقالدى...');
+                // خېرىدار ھالىتى - بىۋاسىتە خېرىدار بېتىنى ئېچىش
+                await openCustomerModeDirect();
+                return;
+            }
+            
+            // باشقۇرغۇچى ھالىتى
             try {
                 // IndexedDB ئېچىش
                 await openDatabase();
@@ -2365,30 +2379,23 @@
                 autoLockMinutes = parseInt(savedLockTime);
             }
             
-            // URL پارامېتىرىنى تەكشۈرۈش - خېرىدار ھالىتى
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('customer') || urlParams.has('order') || urlParams.has('menu')) {
-                // خېرىدار ھالىتى - بىۋاسىتە خېرىدار بېتىنى ئېچىش
-                openCustomerModeDirect();
-                return;
-            }
-            
             // يۈكلەش ئېكرانىنى يوشۇرۇش
             document.getElementById('loadingScreen').style.display = 'none';
+            
+            console.log('باشقۇرغۇچى ھالىتى تەييار');
         });
         
         // خېرىدار ھالىتىنى بىۋاسىتە ئېچىش (URL ئارقىلىق)
         async function openCustomerModeDirect() {
-            // يۈكلەش ئېكرانىنى يوشۇرۇش
-            document.getElementById('loadingScreen').style.display = 'none';
-            // كىرىش ئېكرانىنى يوشۇرۇش
-            document.getElementById('loginScreen').style.display = 'none';
+            console.log('خېرىدار ھالىتى ئېچىلىۋاتىدۇ...');
             
-            // باشقا ئېلېمېنتلارنى يوشۇرۇش
-            document.querySelector('.header').style.display = 'none';
-            document.querySelector('.bottom-nav').style.display = 'none';
-            document.getElementById('lockBtn').style.display = 'none';
-            document.getElementById('sessionTimer').style.display = 'none';
+            // يۈكلەش ئېكرانىنى كۆرسىتىش
+            const loadingScreen = document.getElementById('loadingScreen');
+            if (loadingScreen) loadingScreen.style.display = 'flex';
+            
+            // كىرىش ئېكرانىنى يوشۇرۇش
+            const loginScreen = document.getElementById('loginScreen');
+            if (loginScreen) loginScreen.style.display = 'none';
             
             // IndexedDB ئېچىش
             try {
@@ -2402,11 +2409,29 @@
             // سۈكۈتتىكى سانلىق مەلۇماتلارنى قۇرۇش
             await initDefaultData();
             
+            // يۈكلەش ئېكرانىنى يوشۇرۇش
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            
+            // باشقا ئېلېمېنتلارنى يوشۇرۇش
+            const header = document.querySelector('.header');
+            const bottomNav = document.querySelector('.bottom-nav');
+            const lockBtn = document.getElementById('lockBtn');
+            const sessionTimer = document.getElementById('sessionTimer');
+            
+            if (header) header.style.display = 'none';
+            if (bottomNav) bottomNav.style.display = 'none';
+            if (lockBtn) lockBtn.style.display = 'none';
+            if (sessionTimer) sessionTimer.style.display = 'none';
+            
             // خېرىدار بېتىنى كۆرسىتىش
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById('page-customer').classList.add('active');
-            document.getElementById('page-customer').style.paddingBottom = '200px';
+            const customerPage = document.getElementById('page-customer');
+            if (customerPage) {
+                customerPage.classList.add('active');
+                customerPage.style.paddingBottom = '200px';
+            }
             
+            // خېرىدار بېتىنى يۈكلەش
             loadCustomerPage();
             
             // باشقۇرۇش كۇنۇپكىسىنى يوشۇرۇش (URL ئارقىلىق كىرگەندە)
@@ -2416,6 +2441,8 @@
                     exitBtn.style.display = 'none';
                 }
             }, 100);
+            
+            console.log('خېرىدار ھالىتى ئېچىلدى ✅');
         }
         
         // LocalStorage دىن يۈكلەش (زاپاس پىلان)
@@ -4054,5 +4081,4 @@
         }
     </script>
 </body>
-</html># -restaurant
-ئوقيا باشقۇرۇش سېستىمىسى
+</html>
